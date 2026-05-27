@@ -1,14 +1,14 @@
-# Rheo.Sdk
+# RheoFinance.Sdk
 
 Official .NET SDK for the [Rheo](https://rheo.se) integration API.
 
-Push inventory from your DMS or ERP to Tradera auctions. Receive typed webhook events when items sell. No manual HTTP wiring, no signature boilerplate.
+Push inventory from your DMS or ERP to Tradera auctions. Receive typed webhook events when items sell.
 
 ```
-dotnet add package Rheo.Sdk
+dotnet add package RheoFinance.Sdk
 ```
 
-Requires .NET 8+.
+Requires .NET 7+.
 
 ---
 
@@ -72,9 +72,30 @@ app.MapPost("/webhooks/rheo", async (HttpRequest request, RheoClient rheo) =>
 
 ---
 
+## Publishing
+
+```bash
+# Bump version in Rheo.Sdk.csproj, tag, and push — GitHub Actions handles the rest
+git tag v0.2.0
+git push --follow-tags
+```
+
+Requires `NUGET_API_KEY` secret set in GitHub repo settings (Settings → Secrets → `NUGET_API_KEY`).
+
+To publish manually:
+
+```bash
+cp .env.example .env   # fill in NUGET_API_KEY
+source .env
+dotnet pack src/Rheo.Sdk/Rheo.Sdk.csproj -c Release -o ./nupkg
+dotnet nuget push ./nupkg/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+```
+
+---
+
 ## Documentation
 
-Full documentation at [docs.rheo.se/sdk/csharp/](https://docs.rheo.se/sdk/csharp/)
+Full reference at [docs.rheo.se/sdk/csharp/](https://docs.rheo.se/sdk/csharp/)
 
 ---
 

@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Rheo</RootNamespace>
     <AssemblyName>Rheo.Sdk</AssemblyName>
-    <PackageId>Rheo.Sdk</PackageId>
+    <PackageId>RheoFinance.Sdk</PackageId>
     <Version>0.1.0</Version>
     <Authors>Rheo-App</Authors>
     <Description>Official .NET SDK for the Rheo integration API</Description>
