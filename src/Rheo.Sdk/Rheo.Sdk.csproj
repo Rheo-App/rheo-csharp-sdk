@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Rheo</RootNamespace>
+    <AssemblyName>Rheo.Sdk</AssemblyName>
+    <PackageId>Rheo.Sdk</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Rheo-App</Authors>
+    <Description>Official .NET SDK for the Rheo integration API</Description>
+    <RepositoryUrl>https://github.com/Rheo-App/rheo-csharp-sdk</RepositoryUrl>
+    <PackageTags>rheo;api;sdk;integration;secondhand;automotive</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>
