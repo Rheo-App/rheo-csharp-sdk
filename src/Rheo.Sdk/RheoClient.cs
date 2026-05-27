@@ -43,6 +43,6 @@ public sealed class RheoClient : IDisposable
         new(JsonSerializerDefaults.Web)
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) },
+            Converters = { new JsonStringEnumConverter(SnakeCaseNamingPolicy.Instance) },
         };
 }

@@ -1,6 +1,6 @@
 namespace Rheo.Sdk.Types;
 
-public sealed class UpsertItemRequest
+public class UpsertItemRequest
 {
     public string? Title { get; init; }
     public string? Description { get; init; }
