@@ -31,10 +31,12 @@ await rheo.Items.UpsertAsync("ERP_PART_12345", new UpsertItemRequest
     Price = 950,
     ShippingCost = 149,
     ImageUrls = ["https://cdn.example.com/parts/12345/1.jpg"],
-    Domain = new AutomotivePartDomain
+    Domain = new AutoPartsDomain
     {
+        PartName = "Bromsok fram vänster",
         OemCode = "31400452",
         Manufacturer = "Volvo",
+        VehicleType = "Bil",
         ConditionGrade = "B",
     },
     AutoPublishTradera = true,

@@ -18,7 +18,7 @@ public enum RheoItemType
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "domain")]
-[JsonDerivedType(typeof(AutomotivePartDomain), "automotive_part")]
+[JsonDerivedType(typeof(AutoPartsDomain), "auto_parts")]
 [JsonDerivedType(typeof(ElectronicsDomain), "electronics")]
 [JsonDerivedType(typeof(FashionDomain), "fashion")]
 public abstract class DomainObject
@@ -26,13 +26,16 @@ public abstract class DomainObject
     public abstract string Domain { get; }
 }
 
-public sealed class AutomotivePartDomain : DomainObject
+public sealed class AutoPartsDomain : DomainObject
 {
-    public override string Domain => "automotive_part";
+    public override string Domain => "auto_parts";
+    public string? PartName { get; init; }
     public string? OemCode { get; init; }
     public string? Manufacturer { get; init; }
     public IReadOnlyList<string>? CompatibleModels { get; init; }
     public int? DonorVehicleYear { get; init; }
+    /// <summary>Vehicle type: "Bil", "MC", "Skoter", "ATV", "Husvagn", "Moped", "Traktor"</summary>
+    public string? VehicleType { get; init; }
     public string? ConditionGrade { get; init; }
 }
 

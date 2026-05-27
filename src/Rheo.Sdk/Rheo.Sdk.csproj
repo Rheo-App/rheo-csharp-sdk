@@ -8,7 +8,7 @@
     <RootNamespace>Rheo</RootNamespace>
     <AssemblyName>Rheo.Sdk</AssemblyName>
     <PackageId>Rheo.Sdk</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Authors>Rheo-App</Authors>
     <Description>Official .NET SDK for the Rheo integration API</Description>
     <RepositoryUrl>https://github.com/Rheo-App/rheo-csharp-sdk</RepositoryUrl>
