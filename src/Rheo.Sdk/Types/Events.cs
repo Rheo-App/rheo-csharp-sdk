@@ -2,120 +2,90 @@ using System.Text.Json.Serialization;
 
 namespace Rheo.Sdk.Types;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(ItemCreatedEvent), "item.created")]
-[JsonDerivedType(typeof(ItemImagesReadyEvent), "item.images_ready")]
-[JsonDerivedType(typeof(ItemAIPricedEvent), "item.ai_priced")]
-[JsonDerivedType(typeof(ItemAIListedEvent), "item.ai_listed")]
-[JsonDerivedType(typeof(ListingCreatedEvent), "listing.created")]
-[JsonDerivedType(typeof(ListingEndedEvent), "listing.ended")]
-[JsonDerivedType(typeof(ListingFailedEvent), "listing.failed")]
-[JsonDerivedType(typeof(ItemSoldEvent), "item.sold")]
-[JsonDerivedType(typeof(ItemStatusChangedEvent), "item.status_changed")]
-[JsonDerivedType(typeof(WorkflowApprovalPendingEvent), "workflow.approval_pending")]
-[JsonDerivedType(typeof(WorkflowStepCompletedEvent), "workflow.step_completed")]
-[JsonDerivedType(typeof(WorkflowRunCompletedEvent), "workflow.run_completed")]
+// Webhook event types — typed mirror of the payloads Rheo POSTs to your webhook
+// endpoints (rheo-market/src/worker/handlers/integration.rs). The envelope is
+// { eventId, eventType, timestamp, data }; `data` carries the shared fields plus
+// an additive `account` object and per-event metadata.
+
+/// <summary>
+/// Identifies which Rheo account an event belongs to. <see cref="RheoUserId"/> is
+/// always the owning account. <see cref="MemberExternalId"/> is present only when
+/// the event is delivered to a reseller endpoint (<c>scope='members'</c>) — the
+/// reseller's own reference for the member, so one endpoint can route per yard.
+/// </summary>
+public sealed class EventAccount
+{
+    public required string RheoUserId { get; init; }
+    public string? MemberExternalId { get; init; }
+}
+
+/// <summary>The `data` object of a webhook event. Shared fields are always present;
+/// the metadata fields are populated depending on <c>eventType</c>.</summary>
+public sealed class EventData
+{
+    /// <summary>The integrator's external id for the item (unchanged across all events).</summary>
+    public required string ExternalId { get; init; }
+    /// <summary>Rheo's internal item UUID.</summary>
+    public Guid RheoItemId { get; init; }
+    /// <summary>Origin platform, e.g. <c>tradera</c>, <c>rheo</c>, <c>rheo_stripe</c>, <c>rheo_swish</c>.</summary>
+    public required string Platform { get; init; }
+    /// <summary>Sale price in SEK. <c>0</c> for non-sale events.</summary>
+    public double SalePrice { get; init; }
+    public string? Currency { get; init; }
+    public EventAccount? Account { get; init; }
+
+    /// <summary>item.created only: <c>item</c> or <c>container</c>.</summary>
+    public string? Type { get; init; }
+    /// <summary>item.images_ready only: number of images processed.</summary>
+    public int? ImagesProcessed { get; init; }
+    /// <summary>item.sold / listing.created / listing.ended: the Tradera ad id.</summary>
+    public string? TraderaAdId { get; init; }
+    /// <summary>listing.created only: direct link to the live Tradera ad.</summary>
+    public string? TraderaAdUrl { get; init; }
+    /// <summary>listing.failed only: human-readable failure cause.</summary>
+    public string? Error { get; init; }
+}
+
+// Custom converter (not [JsonPolymorphic]) because the live payload puts `eventId`
+// before the `eventType` discriminator, and STJ's attribute-based polymorphism
+// requires the discriminator to be the first property. The converter buffers the
+// object and reads `eventType` regardless of position. EventType stays a normal
+// (read-only) property, so it serializes back out and is ignored on read.
+[JsonConverter(typeof(RheoEventConverter))]
 public abstract class RheoEvent
 {
-    public required string Id { get; init; }
+    public required string EventId { get; init; }
     public required DateTimeOffset Timestamp { get; init; }
-    public required string ApiVersion { get; init; }
-    public abstract string Type { get; }
+    public required EventData Data { get; init; }
+    public abstract string EventType { get; }
 }
 
 public sealed class ItemCreatedEvent : RheoEvent
 {
-    public override string Type => "item.created";
-    public required string ExternalId { get; init; }
+    public override string EventType => "item.created";
 }
 
 public sealed class ItemImagesReadyEvent : RheoEvent
 {
-    public override string Type => "item.images_ready";
-    public required string ExternalId { get; init; }
-    public int ImageCount { get; init; }
-}
-
-public sealed class ItemAIPricedEvent : RheoEvent
-{
-    public override string Type => "item.ai_priced";
-    public required string ExternalId { get; init; }
-    public double AiPrice { get; init; }
-}
-
-public sealed class ItemAIListedEvent : RheoEvent
-{
-    public override string Type => "item.ai_listed";
-    public required string ExternalId { get; init; }
-    public required string Title { get; init; }
-    public required string Description { get; init; }
+    public override string EventType => "item.images_ready";
 }
 
 public sealed class ListingCreatedEvent : RheoEvent
 {
-    public override string Type => "listing.created";
-    public required string ExternalId { get; init; }
-    public required string Platform { get; init; }
-    public required string PlatformAdId { get; init; }
-    public string? PlatformAdUrl { get; init; }
+    public override string EventType => "listing.created";
 }
 
 public sealed class ListingEndedEvent : RheoEvent
 {
-    public override string Type => "listing.ended";
-    public required string ExternalId { get; init; }
-    public required string Platform { get; init; }
+    public override string EventType => "listing.ended";
 }
 
 public sealed class ListingFailedEvent : RheoEvent
 {
-    public override string Type => "listing.failed";
-    public required string ExternalId { get; init; }
-    public required string Platform { get; init; }
-    public required string Reason { get; init; }
+    public override string EventType => "listing.failed";
 }
 
 public sealed class ItemSoldEvent : RheoEvent
 {
-    public override string Type => "item.sold";
-    public required string ExternalId { get; init; }
-    public double SalePrice { get; init; }
-    public required string Platform { get; init; }
-    public string? BuyerCountry { get; init; }
-}
-
-public sealed class ItemStatusChangedEvent : RheoEvent
-{
-    public override string Type => "item.status_changed";
-    public required string ExternalId { get; init; }
-    public required string FromStatus { get; init; }
-    public required string ToStatus { get; init; }
-}
-
-public sealed class WorkflowApprovalPendingEvent : RheoEvent
-{
-    public override string Type => "workflow.approval_pending";
-    public required string RunId { get; init; }
-    public required string WorkflowId { get; init; }
-    public required string NodeId { get; init; }
-    public required string Prompt { get; init; }
-    public string? SubjectExternalId { get; init; }
-}
-
-public sealed class WorkflowStepCompletedEvent : RheoEvent
-{
-    public override string Type => "workflow.step_completed";
-    public required string RunId { get; init; }
-    public required string WorkflowId { get; init; }
-    public required string NodeId { get; init; }
-    public string? SubjectExternalId { get; init; }
-}
-
-public sealed class WorkflowRunCompletedEvent : RheoEvent
-{
-    public override string Type => "workflow.run_completed";
-    public required string RunId { get; init; }
-    public required string WorkflowId { get; init; }
-    public required string Status { get; init; }
-    public string? SubjectExternalId { get; init; }
+    public override string EventType => "item.sold";
 }

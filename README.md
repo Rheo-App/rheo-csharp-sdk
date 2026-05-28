@@ -51,7 +51,7 @@ app.MapPost("/webhooks/rheo", async (HttpRequest request, RheoClient rheo) =>
     var evt = rheo.Webhooks.Verify(rawBody, request.Headers["X-Rheo-Signature"].ToString());
 
     if (evt is ItemSoldEvent sold)
-        Console.WriteLine($"{sold.ExternalId} sold for {sold.SalePrice} SEK");
+        Console.WriteLine($"{sold.Data.ExternalId} sold for {sold.Data.SalePrice} SEK");
 
     return Results.Ok();
 });
@@ -59,15 +59,57 @@ app.MapPost("/webhooks/rheo", async (HttpRequest request, RheoClient rheo) =>
 
 ---
 
+## Reseller routing (many accounts, one key)
+
+If you manage several Rheo accounts under one reseller API key (e.g. a chain of
+dismantling yards), use `ForAccount` to route calls to a specific member. The value is
+the reseller's `external_id` for that member — the reference set in the business
+**Managed accounts** UI. It sends `x-partner-account` per request, overriding any
+client-level `PartnerAccount`:
+
+```csharp
+await rheo.ForAccount("10").Items.UpsertAsync("10-PART-001", data);
+await rheo.ForAccount("10").Items.UpdatePriceAsync("10-PART-001", new UpdatePriceRequest { Price = 800 });
+var yard = await rheo.ForAccount("10").Items.ListAsync(new ListItemsParams { Status = RheoItemStatus.Active });
+```
+
+Set `PartnerAccount` on `RheoClientOptions` to scope *every* call to one account instead.
+
+---
+
+## Webhooks
+
+Each webhook endpoint has its **own signing secret** — verify with the secret of the
+endpoint that received the event. Pass it explicitly, or set one `WebhookSecret` on the
+client. Pass several to accept any during rotation:
+
+```csharp
+var evt = rheo.Webhooks.Verify(rawBody, signature, endpointSecret);
+var rotating = rheo.Webhooks.Verify(rawBody, signature, oldSecret, newSecret);
+```
+
+Events carry an additive `Data.Account`. On a reseller endpoint (`scope: members`),
+`Account.MemberExternalId` tells you which member the event belongs to:
+
+```csharp
+if (evt is ItemSoldEvent sold)
+    DecrementStock(sold.Data.Account?.MemberExternalId, sold.Data.ExternalId);
+```
+
+Delivered event types: `item.created`, `item.images_ready`, `listing.created`,
+`listing.ended`, `listing.failed`, `item.sold`.
+
+---
+
 ## Features
 
-- **Typed items resource** — UpsertAsync, GetAsync, DeleteAsync, UpdatePriceAsync, UpdateStatusAsync, BatchUpsertAsync (up to 500 items), ListAsync with cursor pagination, SummaryAsync, HistoryAsync
+- **Typed items resource** — UpsertAsync, GetAsync, DeleteAsync, UpdatePriceAsync, UpdateStatusAsync, BatchUpsertAsync (up to 500 items), ListAsync with cursor pagination, SummaryAsync, HistoryAsync, ChildrenAsync
 - **All methods accept `CancellationToken`**
 - **Webhook verification** — HMAC-SHA256, timing-safe (`CryptographicOperations.FixedTimeEquals`)
 - **Automatic retry** — exponential backoff on 429 / 5xx, honours `Retry-After`
 - **Typed exceptions** — `RheoApiException`, `RheoRateLimitException`, `RheoWebhookSignatureException`
-- **Vehicle hierarchy** — model donor vehicles as containers; parts reference their vehicle via `ParentExternalId`
-- **Reseller routing** — pass `PartnerAccount` to scope all calls to a member account
+- **Vehicle hierarchy** — model donor vehicles as containers; parts reference their vehicle via `ParentExternalId`, list parts with `ChildrenAsync`
+- **Reseller routing** — `rheo.ForAccount("10").Items…` per-account, or set `PartnerAccount` client-wide
 - **DI-friendly** — `RheoClient` implements `IDisposable`; register as singleton
 
 ---
@@ -76,7 +118,7 @@ app.MapPost("/webhooks/rheo", async (HttpRequest request, RheoClient rheo) =>
 
 ```bash
 # Tag and push — GitHub Actions publishes automatically
-git tag v0.2.0
+git tag v0.3.0
 git push --follow-tags
 ```
 

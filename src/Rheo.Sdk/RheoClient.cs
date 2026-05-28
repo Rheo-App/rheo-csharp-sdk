@@ -37,6 +37,18 @@ public sealed class RheoClient : IDisposable
         Webhooks = new WebhooksResource(options.WebhookSecret, JsonOptions);
     }
 
+    /// <summary>
+    /// Returns an account-scoped view that routes every <c>Items</c> call to the
+    /// given reseller member by setting the <c>x-partner-account</c> header per
+    /// request. <paramref name="memberExternalId"/> is the reseller's own reference
+    /// for the member (from <c>reseller_memberships</c> / the business "Managed
+    /// accounts" UI). Lets one client + API key serve many managed accounts without
+    /// constructing a client per account, and overrides any client-level
+    /// <see cref="RheoClientOptions.PartnerAccount"/> for calls made through it.
+    /// </summary>
+    public RheoAccountScope ForAccount(string memberExternalId) =>
+        new(_http, JsonOptions, memberExternalId);
+
     public void Dispose() => _http.Dispose();
 
     private static JsonSerializerOptions BuildJsonOptions() =>
