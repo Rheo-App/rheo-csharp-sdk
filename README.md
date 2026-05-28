@@ -118,7 +118,7 @@ Delivered event types: `item.created`, `item.images_ready`, `listing.created`,
 
 ```bash
 # Tag and push — GitHub Actions publishes automatically
-git tag v0.3.0
+git tag v0.7.0
 git push --follow-tags
 ```
 
