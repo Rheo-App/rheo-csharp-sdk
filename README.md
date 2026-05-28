@@ -33,10 +33,8 @@ await rheo.Items.UpsertAsync("ERP_PART_12345", new UpsertItemRequest
     ImageUrls = ["https://cdn.example.com/parts/12345/1.jpg"],
     Domain = new AutoPartsDomain
     {
-        PartName = "Bromsok fram vänster",
-        OemCode = "31400452",
-        Manufacturer = "Volvo",
-        VehicleType = "Bil",
+        Vehicle = new DonorVehicle { Manufacturer = "Volvo", Model = "XC90", Year = 2018, VehicleType = "Bil" },
+        Part = new PartInfo { Name = "Bromsok fram vänster", OemNumber = "31400452" },
         ConditionGrade = "B",
     },
     AutoPublishTradera = true,
