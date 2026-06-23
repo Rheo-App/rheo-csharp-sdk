@@ -21,6 +21,13 @@ public class UpsertItemRequest
     public bool? UseAiEnhancement { get; init; }
     public double? WeightKg { get; init; }
     public string? Currency { get; init; }
+    /// <summary>
+    /// How this item is shipped. Defaults to <see cref="Rheo.Sdk.Types.ShippingStrategy.Integrated"/>
+    /// when omitted. Use <see cref="Rheo.Sdk.Types.ShippingStrategy.SellerShipped"/> for parts you ship
+    /// yourself and report tracking for via <c>Orders.SubmitTrackingAsync</c>. Note: <c>Integrated</c>
+    /// needs <see cref="WeightKg"/> to compute a rate — without it the item resolves to pickup-only.
+    /// </summary>
+    public ShippingStrategy? ShippingStrategy { get; init; }
 }
 
 public sealed class UpsertItemResponse

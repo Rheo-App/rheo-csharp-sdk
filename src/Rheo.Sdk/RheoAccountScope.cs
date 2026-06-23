@@ -15,8 +15,12 @@ public sealed class RheoAccountScope
     /// <summary>Item operations scoped to the member account.</summary>
     public ItemsResource Items { get; }
 
+    /// <summary>Order operations (e.g. seller-shipped tracking) scoped to the member account.</summary>
+    public OrdersResource Orders { get; }
+
     internal RheoAccountScope(HttpClient http, JsonSerializerOptions json, string memberExternalId)
     {
         Items = new ItemsResource(http, json, memberExternalId);
+        Orders = new OrdersResource(http, json, memberExternalId);
     }
 }

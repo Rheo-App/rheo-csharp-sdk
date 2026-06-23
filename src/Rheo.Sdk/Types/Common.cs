@@ -17,6 +17,20 @@ public enum RheoItemType
     Container,
 }
 
+/// <summary>
+/// How an item is shipped. Serializes snake_case: <c>integrated</c> (default — Rheo arranges
+/// shipping, buyer pays actual), <c>seller_shipped</c> (you ship on your own carrier and report
+/// tracking via <c>Orders.SubmitTrackingAsync</c>), <c>fixed</c> (flat <c>ShippingCost</c> Rheo
+/// collects), <c>pickup_only</c> (collection only).
+/// </summary>
+public enum ShippingStrategy
+{
+    Integrated,
+    SellerShipped,
+    Fixed,
+    PickupOnly,
+}
+
 // ============================================================================
 // DOMAIN SYSTEM — typed mirror of the backend AssetDomain
 // (rheo-market/src/models/items/domain.rs).

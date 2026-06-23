@@ -11,6 +11,7 @@ public sealed class RheoClient : IDisposable
     private static readonly JsonSerializerOptions JsonOptions = BuildJsonOptions();
 
     public ItemsResource Items { get; }
+    public OrdersResource Orders { get; }
     public WebhooksResource Webhooks { get; }
 
     public RheoClient(RheoClientOptions options)
@@ -34,6 +35,7 @@ public sealed class RheoClient : IDisposable
             _http.DefaultRequestHeaders.Add("x-partner-account", options.PartnerAccount);
 
         Items = new ItemsResource(_http, JsonOptions);
+        Orders = new OrdersResource(_http, JsonOptions);
         Webhooks = new WebhooksResource(options.WebhookSecret, JsonOptions);
     }
 
