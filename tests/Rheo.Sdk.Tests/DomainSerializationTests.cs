@@ -20,6 +20,7 @@ public sealed class DomainSerializationTests
         var request = new UpsertItemRequest
         {
             Title = "Stötdämpare Bak — Kawasaki ER-6F",
+            ImageUrls = new[] { "https://example.com/1.jpg" },
             Domain = new AutoPartsDomain
             {
                 Vehicle = new DonorVehicle { Manufacturer = "Kawasaki", Model = "ER-6F", Year = 2006, VehicleType = "MC" },
@@ -53,6 +54,8 @@ public sealed class DomainSerializationTests
     {
         var request = new UpsertItemRequest
         {
+            Title = "Volvo part",
+            ImageUrls = Array.Empty<string>(),
             Domain = new AutoPartsDomain { Part = new PartInfo { OemNumber = "312567-VOLVO" } },
         };
 
@@ -67,7 +70,7 @@ public sealed class DomainSerializationTests
     [Fact]
     public void UnitDomain_SerializesDiscriminantOnly()
     {
-        var request = new UpsertItemRequest { Domain = new ToolsDomain() };
+        var request = new UpsertItemRequest { Title = "Tool", ImageUrls = Array.Empty<string>(), Domain = new ToolsDomain() };
 
         var json = JsonSerializer.Serialize(request, Json);
 

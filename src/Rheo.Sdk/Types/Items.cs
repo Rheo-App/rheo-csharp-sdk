@@ -2,12 +2,14 @@ namespace Rheo.Sdk.Types;
 
 public class UpsertItemRequest
 {
-    public string? Title { get; init; }
+    /// <summary>Required by the API (min 2 chars).</summary>
+    public required string Title { get; init; }
+    /// <summary>Required by the API (may be empty). Rheo downloads and processes these.</summary>
+    public required IReadOnlyList<string> ImageUrls { get; init; }
     public string? Description { get; init; }
     /// <summary>Required for <c>Type = Item</c>; ignored (defaults to 0) for <c>Type = Container</c>.</summary>
     public double? Price { get; init; }
     public double? ShippingCost { get; init; }
-    public IReadOnlyList<string>? ImageUrls { get; init; }
     public DomainObject? Domain { get; init; }
     /// <summary>Semver schema version for the domain payload. Defaults to "1.0.0" if omitted.</summary>
     public string? SchemaVersion { get; init; }

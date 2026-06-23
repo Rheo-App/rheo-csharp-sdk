@@ -14,12 +14,19 @@ internal sealed class RetryHandler : DelegatingHandler
     {
         HttpResponseMessage? response = null;
 
+        // 429 is always safe to retry (rejected before processing). 5xx is retried
+        // only for idempotent methods — retrying a POST (e.g. orders/{id}/tracking)
+        // after the server committed it would double-create.
+        var method = request.Method;
+        var idempotent = method == HttpMethod.Get || method == HttpMethod.Head
+            || method == HttpMethod.Put || method == HttpMethod.Delete;
+
         for (var attempt = 0; attempt <= _maxRetries; attempt++)
         {
             response = await base.SendAsync(request, ct);
 
             var status = (int)response.StatusCode;
-            var isRetryable = status == 429 || status >= 500;
+            var isRetryable = status == 429 || (idempotent && status >= 500);
 
             if (!isRetryable || attempt >= _maxRetries)
                 return response;

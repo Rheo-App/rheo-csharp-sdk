@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Rheo.Sdk.Types;
+using Rheo.Sdk;
 
 namespace Rheo.Sdk.Resources;
 
@@ -129,7 +130,10 @@ public sealed class ItemsResource
         if (p is null) return string.Empty;
 
         var parts = new List<string>();
-        if (p.Status is not null) parts.Add($"status={Uri.EscapeDataString(p.Status.ToString()!.ToLowerInvariant())}");
+        // Serialize via the snake_case policy so RheoItemStatus.NotListed -> "not_listed"
+        // (the backend matches exactly). `.ToString().ToLowerInvariant()` gave "notlisted"
+        // and silently returned zero rows.
+        if (p.Status is not null) parts.Add($"status={Uri.EscapeDataString(SnakeCaseNamingPolicy.Instance.ConvertName(p.Status.ToString()!))}");
         if (p.ParentExternalId is not null) parts.Add($"parent_external_id={Uri.EscapeDataString(p.ParentExternalId)}");
         if (p.UpdatedSince is not null) parts.Add($"updated_since={Uri.EscapeDataString(p.UpdatedSince.Value.ToString("O"))}");
         if (p.Limit is not null) parts.Add($"limit={p.Limit}");
